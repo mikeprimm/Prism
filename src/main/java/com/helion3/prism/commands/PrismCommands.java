@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Prism, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2015 Helion3 http://helion3.com/
@@ -27,6 +27,7 @@ import java.util.List;
 
 import com.helion3.prism.api.query.Sort;
 import org.spongepowered.api.command.CommandCallable;
+import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
@@ -57,16 +58,21 @@ public class PrismCommands {
         builder.put(ImmutableList.of("?", "help"), HelpCommand.getCommand());
 
         return CommandSpec.builder()
-            .permission("prism.info")
             .executor((source, args) -> {
-                source.sendMessage(Text.of(
-                    Format.heading(TextColors.GRAY, "By ", TextColors.GOLD, "viveleroi.\n"),
-                    TextColors.DARK_AQUA, "Tracking so good the NSA stole our name.\n",
-                    TextColors.GRAY, "Help: ", TextColors.WHITE, "/pr ?\n",
-                    TextColors.GRAY, "IRC: ", TextColors.WHITE, "irc.esper.net #prism\n",
-                    TextColors.GRAY, "Site: ", TextColors.WHITE, "http://discover-prism.com"
-                ));
-                return CommandResult.empty();
+                // Check permission here, so the node doesn't apply to all child commands
+                if (source.hasPermission("prism.info")) {
+                    source.sendMessage(Text.of(
+                            Format.heading(TextColors.GRAY, "By ", TextColors.GOLD, "viveleroi.\n"),
+                            TextColors.DARK_AQUA, "Tracking so good the NSA stole our name.\n",
+                            TextColors.GRAY, "Help: ", TextColors.WHITE, "/pr ?\n",
+                            TextColors.GRAY, "IRC: ", TextColors.WHITE, "irc.esper.net #prism\n",
+                            TextColors.GRAY, "Site: ", TextColors.WHITE, "http://discover-prism.com"
+                    ));
+
+                    return CommandResult.success();
+                } else {
+                    throw new CommandException(Format.error("You do not have permission to use this command."));
+                }
             })
             .children(builder.build()).build();
     }

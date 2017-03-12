@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Prism, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2015 Helion3 http://helion3.com/
@@ -79,7 +79,7 @@ public class FilterList {
     /**
      * Add a block type string to the list.
      *
-     * @param block String Block type string.
+     * @param blockType String Block type string.
      */
     public void addBlock(String blockType) {
         blocks.add(blockType);
@@ -88,7 +88,7 @@ public class FilterList {
     /**
      * Add a player uuid string to the list.
      *
-     * @param block String Player uuid string.
+     * @param uuid String Player uuid string.
      */
     public void addPlayer(String uuid) {
         players.add(uuid);

@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Prism, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2015 Helion3 http://helion3.com/
@@ -23,6 +23,7 @@
  */
 package com.helion3.prism.commands;
 
+import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.command.CommandResult;
@@ -40,16 +41,18 @@ public class InspectCommand {
             if (source instanceof Player) {
                 Player player = (Player) source;
 
-                if (Prism.getActiveWands().contains(player)) {
-                    Prism.getActiveWands().remove(player);
+                if (Prism.getActiveWands().contains(player.getUniqueId())) {
+                    Prism.getActiveWands().remove(player.getUniqueId());
                     source.sendMessage(Format.heading("Inspection wand disabled."));
                 } else {
-                    Prism.getActiveWands().add(player);
+                    Prism.getActiveWands().add(player.getUniqueId());
                     source.sendMessage(Format.heading("Inspection wand enabled."));
                 }
-            }
 
-            return CommandResult.empty();
+                return CommandResult.success();
+            } else {
+                throw new CommandException(Format.error("You must be a player to use this command."));
+            }
         }).build();
     }
 }

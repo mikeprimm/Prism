@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Prism, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2015 Helion3 http://helion3.com/
@@ -49,7 +49,6 @@ import com.helion3.prism.Prism;
 import com.helion3.prism.api.query.Query;
 import com.helion3.prism.api.query.QuerySession;
 import com.helion3.prism.api.query.SQLQuery;
-import com.helion3.prism.api.query.SQLQuery.Builder;
 import com.helion3.prism.api.storage.StorageAdapterRecords;
 import com.helion3.prism.api.storage.StorageDeleteResult;
 import com.helion3.prism.api.storage.StorageWriteResult;
@@ -181,11 +180,13 @@ public class MySQLRecords implements StorageAdapterRecords {
                     loc.set(DataQueries.WorldUuid, TypeUtil.uuidStringFromDbString(rs.getString("worldUuidHexed")));
                     data.set(DataQueries.Location, loc);
 
-                    JsonObject json = new JsonParser().parse(rs.getString("json")).getAsJsonObject();
-                    DataView extra = DataUtil.dataViewFromJson(json);
+                    if (rs.getString("json") != null) {
+                        JsonObject json = new JsonParser().parse(rs.getString("json")).getAsJsonObject();
+                        DataView extra = DataUtil.dataViewFromJson(json);
 
-                    for (DataQuery key : extra.getKeys(false)) {
-                        data.set(key, extra.get(key).get());
+                        for (DataQuery key : extra.getKeys(false)) {
+                            data.set(key, extra.get(key).get());
+                        }
                     }
                 }
 

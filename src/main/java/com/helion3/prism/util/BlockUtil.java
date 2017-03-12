@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Prism, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2015 Helion3 http://helion3.com/
@@ -26,6 +26,7 @@ package com.helion3.prism.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.spongepowered.api.block.BlockType;
@@ -49,7 +50,7 @@ public class BlockUtil {
         Collection<BlockType> types = Prism.getGame().getRegistry().getAllOf(BlockType.class);
         for (BlockType type : types) {
             Optional<MatterProperty> property = type.getProperty(MatterProperty.class);
-            if (property.isPresent() && property.get().equals(Matter.LIQUID)) {
+            if (property.isPresent() && Objects.equals(property.get().getValue(), Matter.LIQUID)) {
                 liquids.add(type);
             }
         }

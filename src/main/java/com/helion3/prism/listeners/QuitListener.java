@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Prism, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2015 Helion3 http://helion3.com/
@@ -21,26 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.helion3.prism.api.records;
+package com.helion3.prism.listeners;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataSerializable;
-import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.filter.Getter;
+import org.spongepowered.api.event.network.ClientConnectionEvent;
 
-/**
- * Represents a non-existant value for use with a Transaction.
- * For example, an entity rollback produces an entity but there's
- * no valid original value. This allows us to safely represent
- * that without having to wrap/extend the transaction class.
- */
-public class SerializableNonExistant implements DataSerializable {
-    @Override
-    public int getContentVersion() {
-        return 1;
-    }
+import com.helion3.prism.api.records.PrismRecord;
 
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer();
+public class QuitListener {
+    /**
+     * Saves event records when a player quits.
+     *
+     * @param event Disconnect event.
+     */
+    @Listener
+    public void onQuit(final ClientConnectionEvent.Disconnect event, @Getter("getTargetEntity") Player player) {
+        PrismRecord.create().player(player).quit().save();
     }
 }

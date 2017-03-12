@@ -36,6 +36,7 @@ If using Mongo, download the `Prism-(version)-all.jar` file. Otherwise, download
 ## Commands
 
 - `/pr l (parameters)` - Lookup records, filtering by parameters.
+- `/pr near` - Query nearby records.
 - `/pr rb (parameters)` - Rollback, filtering by parameters.
 - `/pr rs (parameters)` - Restore, filtering by parameters.
 - `/pr undo` - Undo your last rollback/restore action.
@@ -58,7 +59,7 @@ If using Mongo, download the `Prism-(version)-all.jar` file. Otherwise, download
 
 ## Permissions
 
-- `prism.info` - Can view informations about Prism.
+- `prism.info` - Can view information about Prism.
 - `prism.help` - Can view help.
 - `prism.inspect` - Can use inspection wand.
 - `prism.lookup` - Can query records (via lookup or near).

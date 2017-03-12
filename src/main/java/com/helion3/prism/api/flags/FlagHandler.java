@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Prism, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2015 Helion3 http://helion3.com/
@@ -67,5 +67,5 @@ public interface FlagHandler {
      * @param value String value(s) given with flag
      * @param query Query Current query object
      */
-    Optional<CompletableFuture<?>> process(QuerySession session, String flag, Optional<String> value, Query query);
+    Optional<CompletableFuture<?>> process(QuerySession session, @Nullable String flag, String value, Query query);
 }

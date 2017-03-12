@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Prism, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2015 Helion3 http://helion3.com/
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.helion3.prism.events.listeners;
+package com.helion3.prism.listeners;
 
 import java.util.Optional;
 
@@ -47,7 +47,7 @@ public class ChangeBlockListener {
     @Listener
     public void onChangeBlock(final ChangeBlockEvent event) {
         Optional<Player> playerCause = event.getCause().first(Player.class);
-        if (playerCause.isPresent() && Prism.getActiveWands().contains(playerCause.get())) {
+        if (playerCause.isPresent() && Prism.getActiveWands().contains(playerCause.get().getUniqueId())) {
             // Cancel and exit event here, not supposed to place/track a block with an active wand.
             event.setCancelled(true);
             return;

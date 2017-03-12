@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Prism, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2015 Helion3 http://helion3.com/
@@ -26,7 +26,6 @@ package com.helion3.prism.storage.mysql;
 import com.helion3.prism.api.flags.Flag;
 import com.helion3.prism.api.query.QuerySession;
 import com.helion3.prism.api.query.SQLQuery;
-import com.helion3.prism.api.query.Sort;
 import com.helion3.prism.util.DataQueries;
 import com.helion3.prism.util.TypeUtil;
 

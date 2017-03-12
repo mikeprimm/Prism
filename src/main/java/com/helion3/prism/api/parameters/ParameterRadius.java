@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Prism, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2015 Helion3 http://helion3.com/
@@ -64,16 +64,17 @@ public class ParameterRadius extends SimpleParameterHandler {
 
     @Override
     public Optional<CompletableFuture<?>> process(QuerySession session, String parameter, String value, Query query) {
-        if (session.getCommandSource().get() instanceof Player) {
-            Location<World> location = ((Player) session.getCommandSource().get()).getLocation();
+        if (session.getCommandSource() instanceof Player) {
+            Player player = (Player) session.getCommandSource();
+            Location<World> location = player.getLocation();
 
             int radius = Integer.parseInt(value);
             int maxRadius = Prism.getConfig().getNode("limits", "radius", "max").getInt();
 
             // Enforce max radius unless player has override perms
-            if (radius > maxRadius && !session.getCommandSource().get().hasPermission("prism.override.radius")) {
+            if (radius > maxRadius && !player.hasPermission("prism.override.radius")) {
                 // @todo move this
-                session.getCommandSource().get().sendMessage(Format.subduedHeading(String.format("Limiting radius to maximum of %d", maxRadius)));
+                player.sendMessage(Format.subduedHeading(String.format("Limiting radius to maximum of %d", maxRadius)));
                 radius = maxRadius;
             }
 
@@ -87,12 +88,12 @@ public class ParameterRadius extends SimpleParameterHandler {
 
     @Override
     public Optional<Pair<String, String>> processDefault(QuerySession session, Query query) {
-        if (session.getCommandSource().get() instanceof Player) {
+        if (session.getCommandSource() instanceof Player) {
             // Default radius from config
             int defaultRadius = Prism.getConfig().getNode("defaults", "radius").getInt();
 
             // Player location
-            Location<World> location = ((Player) session.getCommandSource().get()).getLocation();
+            Location<World> location = ((Player) session.getCommandSource()).getLocation();
 
             query.addCondition(ConditionGroup.from(location, defaultRadius));
 

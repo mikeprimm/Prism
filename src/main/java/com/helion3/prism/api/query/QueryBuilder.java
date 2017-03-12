@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Prism, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2015 Helion3 http://helion3.com/
@@ -38,9 +38,6 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.api.text.Text;
 
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.helion3.prism.Prism;
 import com.helion3.prism.api.flags.FlagHandler;
 import com.helion3.prism.api.parameters.ParameterException;
@@ -86,7 +83,7 @@ public class QueryBuilder {
         // Track all parameter pairs
         Map<String, String> definedParameters = new HashMap<>();
 
-        if (arguments.length > 0) {
+        if (arguments != null && arguments.length > 0) {
             List<CompletableFuture<?>> futures = new ArrayList<>();
             for (String arg : arguments) {
                 Optional<CompletableFuture<?>> listenable;
@@ -104,13 +101,11 @@ public class QueryBuilder {
                     definedParameters.put(pair.getKey(), pair.getValue());
                 }
 
-                if (listenable.isPresent()) {
-                    futures.add(listenable.get());
-                }
+                listenable.ifPresent(futures::add);
             }
 
             if (!futures.isEmpty()) {
-                CompletableFuture<Void> combinedFuture = CompletableFuture.<Void>allOf(futures.toArray(new CompletableFuture[futures.size()]));
+                CompletableFuture<Void> combinedFuture = CompletableFuture.<Void>allOf(futures.toArray(new CompletableFuture<?>[futures.size()]));
                 combinedFuture.thenAccept((q) -> future.complete(query));
             } else {
                 future.complete(query);
@@ -121,7 +116,7 @@ public class QueryBuilder {
 
         if (Prism.getConfig().getNode("defaults", "enabled").getBoolean()) {
             // Require any parameter defaults
-            String defaultsUsed = "";
+            StringBuilder defaultsUsed = new StringBuilder();
             for (ParameterHandler handler : Prism.getParameterHandlers()) {
                 boolean aliasFound = false;
 
@@ -133,16 +128,14 @@ public class QueryBuilder {
                 }
 
                 if (!aliasFound) {
-                    Optional<Pair<String, String>> pair = handler.processDefault(session, query);
-                    if (pair.isPresent()) {
-                        defaultsUsed += pair.get().getKey() + ":" + pair.get().getValue() + " ";
-                    }
+                    handler.processDefault(session, query).ifPresent(stringStringPair -> defaultsUsed.append(stringStringPair.getKey())
+                        .append(":").append(stringStringPair.getValue()).append(" "));
                 }
             }
 
             // @todo should move this
-            if (!defaultsUsed.isEmpty()) {
-                session.getCommandSource().get().sendMessage(Format.subduedHeading(Text.of(String.format("Defaults used: %s", defaultsUsed))));
+            if (defaultsUsed.length() > 0) {
+                session.getCommandSource().sendMessage(Format.subduedHeading(Text.of(String.format("Defaults used: %s", defaultsUsed.toString()))));
             }
         }
 
@@ -161,13 +154,13 @@ public class QueryBuilder {
         flag = flag.substring(1);
 
         // Determine the true alias and value
-        Optional<String> optionalValue = Optional.empty();
+        String value = null;
         if (flag.contains("=")) {
             // Split the parameter: values
             String[] split = flag.split("=");
             flag = split[0];
             if (split.length == 2 && !split[1].trim().isEmpty()) {
-                optionalValue = Optional.of(split[1]);
+                value = split[1];
             }
         }
 
@@ -180,16 +173,16 @@ public class QueryBuilder {
         FlagHandler handler = optionalHandler.get();
 
         // Allows this command source?
-        if (!handler.acceptsSource(session.getCommandSource().get())) {
+        if (!handler.acceptsSource(session.getCommandSource())) {
             throw new ParameterException("This command source may not use the \"" + flag + "\" flag.");
         }
 
         // Validate value
-        if (optionalValue.isPresent() && !handler.acceptsValue(optionalValue.get())) {
-            throw new ParameterException("Invalid value \"" + optionalValue.get() + "\" for parameter \"" + flag + "\".");
+        if (value != null && !handler.acceptsValue(value)) {
+            throw new ParameterException("Invalid value \"" + value + "\" for parameter \"" + flag + "\".");
         }
 
-        return handler.process(session, flag, optionalValue, query);
+        return handler.process(session, flag, value, query);
     }
 
     /**
@@ -236,7 +229,7 @@ public class QueryBuilder {
         ParameterHandler handler = optionalHandler.get();
 
         // Allows this command source?
-        if (!handler.acceptsSource(session.getCommandSource().get())) {
+        if (!handler.acceptsSource(session.getCommandSource())) {
             throw new ParameterException("This command source may not use the \"" + parameter.getKey() + "\" parameter.");
         }
 

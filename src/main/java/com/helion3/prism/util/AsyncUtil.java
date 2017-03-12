@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Prism, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2015 Helion3 http://helion3.com/
@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 import com.helion3.prism.api.flags.Flag;
 import com.helion3.prism.api.records.Result;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.command.CommandSource;
@@ -47,12 +48,7 @@ public class AsyncUtil {
      * @param session QuerySession running this lookup.
      */
     public static void lookup(final QuerySession session) throws Exception {
-        if (!session.getCommandSource().isPresent()) {
-            // @todo handle this.
-            return;
-        }
-
-        CommandSource source = session.getCommandSource().get();
+        CommandSource source = session.getCommandSource();
 
         // Enforce lookup limits
         session.getQuery().setLimit(Prism.getConfig().getNode("query", "lookup", "limit").getInt());
@@ -60,21 +56,16 @@ public class AsyncUtil {
         async(session, new AsyncCallback() {
             @Override
             public void success(List<Result> results) {
-                if (results.size() > 5) {
-                    List<Text> messages = results.stream()
-                       .map(result -> Messages.from(result, session.hasFlag(Flag.EXTENDED))).collect(Collectors.toList());
-
-                    Optional<PaginationService> service = Prism.getGame().getServiceManager().provide(PaginationService.class);
-                    if (service.isPresent()) {
-                        // Build paginated content
-                        PaginationList.Builder builder = service.get().builder();
-                        builder.contents(messages);
-                        builder.sendTo(session.getCommandSource().get());
-                        builder.linesPerPage(5);
-                    }
+                List<Text> messages = results.stream().map(result -> Messages.from(result, session.hasFlag(Flag.EXTENDED))).collect(Collectors.toList());
+                Optional<PaginationService> paginationService = Sponge.getServiceManager().provide(PaginationService.class);
+                if (paginationService.isPresent()) {
+                    paginationService.get().builder()
+                        .contents(messages)
+                        .linesPerPage(10)
+                        .sendTo(source);
                 } else {
-                    for (Result result : results) {
-                        session.getCommandSource().get().sendMessage(Messages.from(result, session.hasFlag(Flag.EXTENDED)));
+                    for (Text message : messages) {
+                        source.sendMessage(message);
                     }
                 }
             }
@@ -111,7 +102,7 @@ public class AsyncUtil {
                             callback.success(results);
                         }
                     } catch(Exception e) {
-                        session.getCommandSource().get().sendMessage(Format.error(e.getMessage()));
+                        session.getCommandSource().sendMessage(Format.error(e.getMessage()));
                         e.printStackTrace();
                     }
                 });

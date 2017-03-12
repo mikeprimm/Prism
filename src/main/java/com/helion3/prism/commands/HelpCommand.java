@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Prism, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2015 Helion3 http://helion3.com/
@@ -37,11 +37,12 @@ public class HelpCommand {
             .permission("prism.help")
             .executor((source, args) -> {
                 source.sendMessage(Format.message("/pr [l|lookup] (params)", TextColors.GRAY, " - Query the database."));
+                source.sendMessage(Format.message("/pr near", TextColors.GRAY, " - Quick lookup of nearby activity."));
                 source.sendMessage(Format.message("/pr [rb|rollback] (params)", TextColors.GRAY, " - Reverse changes, limited by parameters."));
                 source.sendMessage(Format.message("/pr [rs|restore] (params)", TextColors.GRAY, " - Re-apply changes, limited by parameters."));
                 source.sendMessage(Format.message("/pr undo", TextColors.GRAY, " - Reverse your last rollback/restore."));
                 source.sendMessage(Format.message("/pr i", TextColors.GRAY, " - Toggle the inspection wand."));
-                return CommandResult.empty();
+                return CommandResult.success();
             }).build();
     }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Prism, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2015 Helion3 http://helion3.com/
@@ -35,7 +35,6 @@ import org.spongepowered.api.world.World;
 
 public class WorldUtil {
     private WorldUtil() {}
-
 
     public static int removeIllegalBlocks(Location<World> location, int radius, Cause cause) {
         final World world = location.getExtent();

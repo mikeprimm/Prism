@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Prism, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2015 Helion3 http://helion3.com/
@@ -93,7 +93,7 @@ abstract public class Result {
      */
     public static Result from(String eventName, boolean isAggregate) throws IllegalAccessException, InstantiationException {
         // Build our result object
-        Result result = null;
+        final Result result;
         if (isAggregate) {
             result = new ResultAggregate();
         } else {

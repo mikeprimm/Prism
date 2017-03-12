@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Prism, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2015 Helion3 http://helion3.com/
@@ -78,6 +78,16 @@ public class Configuration {
             ConfigurationNode dbMongoPort = rootNode.getNode("db", "mongo", "port");
             if (dbMongoPort.isVirtual()) {
                 dbMongoPort.setValue(27017);
+            }
+
+            ConfigurationNode dbMongoUser = rootNode.getNode("db", "mongo", "user");
+            if (dbMongoUser.isVirtual()) {
+                dbMongoUser.setValue("");
+            }
+
+            ConfigurationNode dbMongoPass = rootNode.getNode("db", "mongo", "pass");
+            if (dbMongoPass.isVirtual()) {
+                dbMongoPass.setValue("");
             }
 
             // MySQL

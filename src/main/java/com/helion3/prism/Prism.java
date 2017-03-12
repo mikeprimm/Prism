@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Prism, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2015 Helion3 http://helion3.com/
@@ -31,23 +31,31 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import com.helion3.prism.api.flags.*;
 import com.helion3.prism.api.parameters.ParameterCause;
 import com.helion3.prism.api.records.BlockResult;
 import com.helion3.prism.api.records.Result;
-import com.helion3.prism.events.listeners.*;
+import com.helion3.prism.listeners.ChangeBlockListener;
+import com.helion3.prism.listeners.ChangeInventoryListener;
+import com.helion3.prism.listeners.DeathListener;
+import com.helion3.prism.listeners.DropItemListener;
+import com.helion3.prism.listeners.JoinListener;
+import com.helion3.prism.listeners.QuitListener;
+import com.helion3.prism.listeners.RequiredInteractListener;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.config.DefaultConfig;
+import org.spongepowered.api.scheduler.Task;
 
 import com.google.inject.Inject;
 import com.helion3.prism.api.filters.FilterList;
@@ -72,15 +80,15 @@ import com.helion3.prism.storage.mysql.MySQLStorageAdapter;
  *
  * @author viveleroi
  */
-@Plugin(id = "prism", name = "Prism", version = "3.0.0")
+@Plugin(id = "prism", name = "Prism", version = "3.0.0", description = "A rollback/restore grief-prevention plugin.", authors = "viveleroi")
 final public class Prism {
-    private static List<Player> activeWands = new ArrayList<>();
+    private static List<UUID> activeWands = new ArrayList<>();
     private static final FilterList filterlist = new FilterList(FilterMode.BLACKLIST);
     private static Configuration config;
     private static Game game;
     private static List<ParameterHandler> handlers = new ArrayList<>();
     private static List<FlagHandler> flagHandlers = new ArrayList<>();
-    private static Map<Player, List<ActionableResult>> lastActionResults = new HashMap<>();
+    private static Map<UUID, List<ActionableResult>> lastActionResults = new HashMap<>();
     private static Logger logger;
     private static Map<String,Class<? extends Result>> resultRecords = new HashMap<>();
     private static File parentDirectory;
@@ -145,7 +153,12 @@ final public class Prism {
         }
 
         // Initialize the recording queue manager
-        new RecordingQueueManager().start();
+        Task.builder()
+            .async()
+            .name("PrismRecordingQueueManager")
+            .interval(1, TimeUnit.SECONDS)
+            .execute(new RecordingQueueManager())
+            .submit(this);
 
         // Commands
         game.getCommandManager().register(this, PrismCommands.getCommand(), "prism", "pr");
@@ -156,9 +169,9 @@ final public class Prism {
     /**
      * Returns a list of players who have active inspection wands.
      *
-     * @return List of Players.
+     * @return A list of players' UUIDs who have an active inspection wand
      */
-    public static List<Player> getActiveWands() {
+    public static List<UUID> getActiveWands() {
         return activeWands;
     }
 
@@ -197,9 +210,10 @@ final public class Prism {
 
     /**
      * Get a map of players and their last available actionable results.
-     * @return
+     *
+     * @return A map of players' UUIDs to a list of their {@link ActionableResult}s
      */
-    public static Map<Player, List<ActionableResult>> getLastActionResults() {
+    public static Map<UUID, List<ActionableResult>> getLastActionResults() {
         return lastActionResults;
     }
 

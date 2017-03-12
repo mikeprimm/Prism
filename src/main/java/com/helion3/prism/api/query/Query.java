@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Prism, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2015 Helion3 http://helion3.com/
@@ -27,11 +27,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 final public class Query {
-    private List<Condition> conditions = new ArrayList<>();
+    private final List<Condition> conditions = new ArrayList<>();
     private int limit = 1000;
 
     public void addConditions(List<Condition> conditions) {
-        conditions.addAll(conditions);
+        this.conditions.addAll(conditions);
     }
 
     /**
