@@ -87,7 +87,11 @@ abstract public class Result {
      */
     private String formatId(String id) {
         if (id.contains(":")) {
-            id = id.split(":")[1];
+            String split[];
+            split = id.split(":");
+            if(split[0] == "minecraft"){
+                id = split[1];
+            }
         }
 
         return id;
