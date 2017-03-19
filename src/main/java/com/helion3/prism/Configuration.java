@@ -132,6 +132,11 @@ public class Configuration {
                 dbH2TablePrefix.setValue("prism_");
             }
 
+            ConfigurationNode eventIgnoreFakePlayers = rootNode.getNode("events", "ignore-fakeplayers");
+            if (eventIgnoreFakePlayers.isVirtual()) {
+                eventIgnoreFakePlayers.setValue(false);
+            }
+
             // Events
             ConfigurationNode eventBlockBreak = rootNode.getNode("events", "break");
             if (eventBlockBreak.isVirtual()) {
@@ -168,6 +173,11 @@ public class Configuration {
                 eventEntityDeath.setValue(true);
             }
 
+            ConfigurationNode eventItemInsert = rootNode.getNode("events", "insert");
+            if (eventItemInsert.isVirtual()) {
+                eventItemInsert.setValue(true);
+            }
+
             ConfigurationNode eventPlayerJoin = rootNode.getNode("events", "join");
             if (eventPlayerJoin.isVirtual()) {
                 eventPlayerJoin.setValue(false);
@@ -176,6 +186,11 @@ public class Configuration {
             ConfigurationNode eventPlayerQuit = rootNode.getNode("events", "quit");
             if (eventPlayerQuit.isVirtual()) {
                 eventPlayerQuit.setValue(false);
+            }
+
+            ConfigurationNode eventItemRemove = rootNode.getNode("events", "remove");
+            if (eventItemRemove.isVirtual()) {
+                eventItemRemove.setValue(true);
             }
 
             // Default parameters
