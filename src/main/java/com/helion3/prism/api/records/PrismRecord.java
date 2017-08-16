@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.Optional;
 
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
@@ -46,15 +45,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.helion3.prism.Prism;
 import com.helion3.prism.queues.RecordingQueue;
 import com.helion3.prism.util.DataQueries;
+import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.world.Locatable;
 
 /**
  * An easy-to-understand factory class for Prism records.
  *
- * By chaining methods together, you can build a record with
- * natural-language style syntax.
+ * By chaining methods together, you can build a record with natural-language
+ * style syntax.
  *
  * For example:
  *
@@ -62,11 +66,13 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
  *
  */
 public class PrismRecord {
+
     private final PrismRecordSourceBuilder source;
     private final PrismRecordEventBuilder event;
 
     /**
      * A final, save-ready record.
+     *
      * @param source Result source builder.
      * @param event Result event builder.
      */
@@ -88,8 +94,7 @@ public class PrismRecord {
         String causeIdentifier = "environment";
         if (source.getSource() instanceof Player) {
             causeIdentifier = ((Player) source.getSource()).getUniqueId().toString();
-        }
-        else if(source.getSource() instanceof Entity) {
+        } else if (source.getSource() instanceof Entity) {
             causeIdentifier = ((Entity) source.getSource()).getType().getName();
         }
 
@@ -120,6 +125,7 @@ public class PrismRecord {
      * Build record with event source.
      */
     public static class PrismRecordSourceBuilder {
+
         private final Object source;
 
         private PrismRecordSourceBuilder(Object source) {
@@ -135,6 +141,7 @@ public class PrismRecord {
      * Build record event/action details.
      */
     public static class PrismRecordEventBuilder {
+
         protected final PrismRecordSourceBuilder source;
         protected String eventName;
         protected DataContainer data = new MemoryDataContainer();
@@ -145,6 +152,7 @@ public class PrismRecord {
 
         /**
          * Get data.
+         *
          * @return DataContainer Data
          */
         public DataContainer getData() {
@@ -178,7 +186,7 @@ public class PrismRecord {
          * @param transaction Block broken.
          * @return PrismRecord
          */
-        public PrismRecord decayedBlock(Transaction<BlockSnapshot> transaction){
+        public PrismRecord decayedBlock(Transaction<BlockSnapshot> transaction) {
             this.eventName = "decay";
             writeBlockTransaction(transaction);
             return new PrismRecord(source, this);
@@ -202,7 +210,7 @@ public class PrismRecord {
          * @param transaction Block broken.
          * @return PrismRecord
          */
-        public PrismRecord grewBlock(Transaction<BlockSnapshot> transaction){
+        public PrismRecord grewBlock(Transaction<BlockSnapshot> transaction) {
             this.eventName = "grow";
             writeBlockTransaction(transaction);
             return new PrismRecord(source, this);
@@ -214,7 +222,7 @@ public class PrismRecord {
          * @param transaction itemstack inserted.
          * @return PrismRecord
          */
-        public PrismRecord insertItem(SlotTransaction transaction){
+        public PrismRecord insertItem(SlotTransaction transaction) {
             this.eventName = "insert";
             writeItemTransaction(transaction);
             return new PrismRecord(source, this);
@@ -238,7 +246,7 @@ public class PrismRecord {
          * @param transaction Block placed.
          * @return PrismRecord
          */
-        public PrismRecord placedBlock(Transaction<BlockSnapshot> transaction){
+        public PrismRecord placedBlock(Transaction<BlockSnapshot> transaction) {
             this.eventName = "place";
             writeBlockTransaction(transaction);
             return new PrismRecord(source, this);
@@ -250,7 +258,7 @@ public class PrismRecord {
          * @param transaction itemstack inserted.
          * @return PrismRecord
          */
-        public PrismRecord removeItem(SlotTransaction transaction){
+        public PrismRecord removeItem(SlotTransaction transaction) {
             this.eventName = "remove";
             writeItemTransaction(transaction);
             return new PrismRecord(source, this);
@@ -262,18 +270,19 @@ public class PrismRecord {
          * @param entity Living entity.
          * @return PrismRecord
          */
-        public PrismRecord killed(Living entity){
+        public PrismRecord killed(Living entity) {
             this.eventName = "death";
             writeEntity(entity);
             return new PrismRecord(source, this);
         }
 
         /**
-         * Helper method for writing block transaction data, using only
-         * the final replacement value. We must alter the data structure
-         * slightly to avoid duplication, decoupling location from blocks, etc.
+         * Helper method for writing block transaction data, using only the
+         * final replacement value. We must alter the data structure slightly to
+         * avoid duplication, decoupling location from blocks, etc.
          *
-         * @param transaction BlockTransaction representing a block change in the world.
+         * @param transaction BlockTransaction representing a block change in
+         * the world.
          */
         private void writeBlockTransaction(Transaction<BlockSnapshot> transaction) {
             checkNotNull(transaction);
@@ -299,6 +308,7 @@ public class PrismRecord {
 
         /**
          * Helper method for formatting entity container data.
+         *
          * @param entity
          */
         private void writeEntity(Entity entity) {
@@ -357,48 +367,54 @@ public class PrismRecord {
         }
 
         /**
-         * Helper method for writing block transaction data, using only
-         * the final replacement value. We must alter the data structure
-         * slightly to avoid duplication, decoupling location from blocks, etc.
+         * Helper method for writing block transaction data, using only the
+         * final replacement value. We must alter the data structure slightly to
+         * avoid duplication, decoupling location from blocks, etc.
          *
-         * @param transaction BlockTransaction representing a block change in the world.
+         * @param transaction BlockTransaction representing a block change in
+         * the world.
          */
         private void writeItemTransaction(SlotTransaction transaction) {
             checkNotNull(transaction);
             Slot slot = transaction.getSlot();
 
             // Location
-            DataContainer location = ((TileEntityCarrier) slot.parent()).getLocation().toContainer();
-            data.set(DataQueries.Location, location);
+            ((CarriedInventory) slot.parent()).getCarrier().ifPresent((Object carrier) -> {
+                if (carrier instanceof Locatable && !(carrier instanceof Entity)) {
+                    DataContainer location = ((Locatable) carrier).getLocation().toContainer();
+                    data.set(DataQueries.Location, location);
 
-            String itemId = "";
-            int itemQty = 0;
+                    String itemId = "";
+                    int itemQty = 0;
 
-            // Insert
-            if (transaction.getFinal().getType() != ItemTypes.NONE || transaction.getFinal().getCount() > transaction.getOriginal().getCount()) {
-                itemId = transaction.getFinal().getType().getId();
-                if (transaction.getOriginal().getType() == ItemTypes.NONE) {
-                    itemQty = transaction.getFinal().getCount();
-                } else {
-                    itemQty = transaction.getFinal().getCount() - transaction.getOriginal().getCount();
+                    // Insert
+                    if (transaction.getFinal().getType() != ItemTypes.NONE || transaction.getFinal().getCount() > transaction.getOriginal().getCount()) {
+                        itemId = transaction.getFinal().getType().getId();
+                        if (transaction.getOriginal().getType() == ItemTypes.NONE) {
+                            itemQty = transaction.getFinal().getCount();
+                        } else {
+                            itemQty = transaction.getFinal().getCount() - transaction.getOriginal().getCount();
+                        }
+                    }
+                    // Remove
+                    if (transaction.getFinal().getType() == ItemTypes.NONE || transaction.getFinal().getCount() < transaction.getOriginal().getCount()) {
+                        itemId = transaction.getOriginal().getType().getId();
+                        if (transaction.getFinal().getType() == ItemTypes.NONE) {
+                            itemQty = transaction.getOriginal().getCount();
+                        } else {
+                            itemQty = transaction.getOriginal().getCount() - transaction.getFinal().getCount();
+                        }
+                    }
+
+                    data.set(DataQueries.Target, itemId);
+                    data.set(DataQueries.Quantity, itemQty);
                 }
-            }
-            // Remove
-            if (transaction.getFinal().getType() == ItemTypes.NONE || transaction.getFinal().getCount() < transaction.getOriginal().getCount()) {
-                itemId = transaction.getOriginal().getType().getId();
-                if (transaction.getFinal().getType() == ItemTypes.NONE){
-                    itemQty = transaction.getOriginal().getCount();
-                } else {
-                    itemQty = transaction.getOriginal().getCount() - transaction.getFinal().getCount();
-                }
-            }
-
-            data.set(DataQueries.Target, itemId);
-            data.set(DataQueries.Quantity, itemQty);
+            });
         }
 
         /**
-         * Removes unnecessary/duplicate data from a BlockSnapshot's DataContainer.
+         * Removes unnecessary/duplicate data from a BlockSnapshot's
+         * DataContainer.
          *
          * @param blockSnapshot Block Snapshot.
          * @return DataContainer Formatted Data Container.
@@ -425,6 +441,7 @@ public class PrismRecord {
      * Builder for player-only events.
      */
     public static final class PrismPlayerRecordEventBuilder extends PrismRecordEventBuilder {
+
         public PrismPlayerRecordEventBuilder(PrismRecordSourceBuilder source) {
             super(source);
         }
@@ -468,6 +485,7 @@ public class PrismRecord {
      * Root builder for a new prism record.
      */
     public static final class PrismRecordBuilder {
+
         /**
          * Set a cause based on a Cause chain.
          *
@@ -526,6 +544,7 @@ public class PrismRecord {
 
     /**
      * Create a new record builder.
+     *
      * @return PrismRecordBuilder Result builder.
      */
     public static PrismRecordBuilder create() {
