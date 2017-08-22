@@ -45,11 +45,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.helion3.prism.Prism;
 import com.helion3.prism.queues.RecordingQueue;
 import com.helion3.prism.util.DataQueries;
-import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
+import net.minecraft.inventory.AnimalChest;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.ContainerHorseInventory;
+import net.minecraft.inventory.Slot;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.entity.PlayerInventory;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.world.Locatable;
@@ -376,11 +378,23 @@ public class PrismRecord {
          */
         private void writeItemTransaction(SlotTransaction transaction) {
             checkNotNull(transaction);
-            Slot slot = transaction.getSlot();
 
             // Location
-            ((CarriedInventory) slot.parent()).getCarrier().ifPresent((Object carrier) -> {
-                if (carrier instanceof Locatable && !(carrier instanceof Entity)) {
+            ((CarriedInventory) transaction.getSlot().parent()).getCarrier().ifPresent((Object carrier) -> {
+                if (carrier instanceof Locatable) {
+                    
+                    /**
+                       This is a bit of a hack, but will work until Sponge implements a better way of getting the real inventory of a slot.                     
+                     */
+                    Container container = ((Container) transaction.getSlot().parent());
+                    Integer slotClicked = transaction.getSlot().getProperty(SlotIndex.class, "slotindex").map(SlotIndex::getValue).orElse(-1);
+                    
+                    Slot slot = container.inventorySlots.get(slotClicked);
+                    
+                    if(slot.inventory instanceof PlayerInventory || slot.inventory instanceof AnimalChest || slot.inventory instanceof ContainerHorseInventory) {
+                        return;
+                    }       
+                    
                     DataContainer location = ((Locatable) carrier).getLocation().toContainer();
                     data.set(DataQueries.Location, location);
 
