@@ -45,7 +45,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.helion3.prism.Prism;
 import com.helion3.prism.queues.RecordingQueue;
 import com.helion3.prism.util.DataQueries;
-import net.minecraft.inventory.AnimalChest;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerHorseInventory;
 import net.minecraft.inventory.Slot;
@@ -391,7 +390,7 @@ public class PrismRecord {
                     
                     Slot slot = container.inventorySlots.get(slotClicked);
                     
-                    if(slot.inventory instanceof PlayerInventory || slot.inventory instanceof AnimalChest || slot.inventory instanceof ContainerHorseInventory) {
+                    if(slot.inventory instanceof PlayerInventory || slot.inventory instanceof ContainerHorseInventory) {
                         return;
                     }       
                     

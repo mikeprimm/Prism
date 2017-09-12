@@ -34,9 +34,11 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 public class WorldUtil {
-    private WorldUtil() {}
 
-    public static int removeIllegalBlocks(Location<World> location, int radius, Cause cause) {
+    private WorldUtil() {
+    }
+
+    public static int removeIllegalBlocks(Location<World> location, int radius) {
         final World world = location.getExtent();
 
         int xMin = location.getBlockX() - radius;
@@ -64,7 +66,7 @@ public class WorldUtil {
                 for (int y = yMin; y <= yMax; y++) {
                     BlockType existing = world.getBlock(x, y, z).getType();
                     if (existing.equals(BlockTypes.FIRE) || existing.equals(BlockTypes.TNT)) {
-                        world.setBlockType(x, y, z, BlockTypes.AIR, cause);
+                        world.setBlockType(x, y, z, BlockTypes.AIR);
                         changeCount++;
                     }
                 }
@@ -83,7 +85,7 @@ public class WorldUtil {
      * @param cause Cause
      * @return integer Count of removals
      */
-    public static int removeAroundFromLocation(BlockType type, Location<World> location, int radius, Cause cause) {
+    public static int removeAroundFromLocation(BlockType type, Location<World> location, int radius) {
         final World world = location.getExtent();
 
         int xMin = location.getBlockX() - radius;
@@ -110,7 +112,7 @@ public class WorldUtil {
             for (int z = zMin; z <= zMax; z++) {
                 for (int y = yMin; y <= yMax; y++) {
                     if (world.getBlock(x, y, z).getType().equals(type)) {
-                        world.setBlockType(x, y, z, BlockTypes.AIR, cause);
+                        world.setBlockType(x, y, z, BlockTypes.AIR);
                         changeCount++;
                     }
                 }
@@ -140,11 +142,10 @@ public class WorldUtil {
         Collection<Entity> entities = location.getExtent().getEntities(e -> {
             Location<World> loc = e.getLocation();
 
-            return (e.getType().equals(EntityTypes.ITEM) &&
-                    (loc.getX() > xMin && loc.getX() <= xMax) &&
-                    (loc.getY() > yMin && loc.getY() <= yMax) &&
-                    (loc.getZ() > zMin && loc.getZ() <= zMax)
-            );
+            return (e.getType().equals(EntityTypes.ITEM)
+                    && (loc.getX() > xMin && loc.getX() <= xMax)
+                    && (loc.getY() > yMin && loc.getY() <= yMax)
+                    && (loc.getZ() > zMin && loc.getZ() <= zMax));
         });
 
         if (!entities.isEmpty()) {
@@ -162,10 +163,10 @@ public class WorldUtil {
      * @param cause Cause
      * @return integer Count of removals
      */
-    public static int removeLiquidsAroundLocation(Location<World> location, int radius, Cause cause) {
+    public static int removeLiquidsAroundLocation(Location<World> location, int radius) {
         int changeCount = 0;
         for (BlockType liquid : BlockUtil.getLiquidBlockTypes()) {
-            changeCount = removeAroundFromLocation(liquid, location, radius, cause);
+            changeCount = removeAroundFromLocation(liquid, location, radius);
         }
 
         return changeCount;
