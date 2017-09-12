@@ -48,8 +48,6 @@ def getVersionName = { ->
     return 'S5.1-' + stdout.toString().trim()
 }
 
-version = getVersionName()
-
 // Default tasks
 defaultTasks 'licenseFormat', 'check', 'build', 'shadowJar'
 
@@ -65,6 +63,8 @@ ext.organization = 'Helion3'
 ext.buildNumber = project.hasProperty("buildNumber") ? buildNumber : '0'
 ext.ciSystem = project.hasProperty("ciSystem") ? ciSystem : 'unknown'
 ext.commit = project.hasProperty("commit") ? commit : 'unknown'
+
+version = '3.0.0-beta3-S5.1-' + getVersionName()
 
 // Project repositories
 repositories {
