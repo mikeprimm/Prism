@@ -25,7 +25,6 @@ package com.helion3.prism.api.records;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataSerializable;
-import org.spongepowered.api.data.MemoryDataContainer;
 
 /**
  * Represents a non-existent value for use with a Transaction.
@@ -41,6 +40,6 @@ public class SerializableNonExistent implements DataSerializable {
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer();
+        return DataContainer.createNew();
     }
 }

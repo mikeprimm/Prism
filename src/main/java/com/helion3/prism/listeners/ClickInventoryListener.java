@@ -25,16 +25,12 @@ package com.helion3.prism.listeners;
 
 import com.helion3.prism.Prism;
 import com.helion3.prism.api.records.PrismRecord;
-import java.util.Optional;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.filter.Getter;
-import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 
@@ -56,14 +52,14 @@ public class ClickInventoryListener {
             Slot slot = transaction.getSlot();
             if (slot.parent() instanceof CarriedInventory && transaction.getOriginal() != transaction.getFinal()) {
                 //If the final item is SOMETHING (or amount is more) person is inserting
-                if (transaction.getFinal().getType() != ItemTypes.NONE || transaction.getFinal().getCount() > transaction.getOriginal().getCount()) {
+                if (transaction.getFinal().getType() != ItemTypes.NONE || transaction.getFinal().getQuantity() > transaction.getOriginal().getQuantity()) {
                     if (Prism.listening.INSERT) {
                         PrismRecord.PrismRecordEventBuilder record = PrismRecord.create().source(event.getCause());
                         record.insertItem(transaction).save();
                     }
                 }
                 //If the final item is NONE (or amount is less) person is withdrawing
-                if (transaction.getFinal().getType() == ItemTypes.NONE || transaction.getFinal().getCount() < transaction.getOriginal().getCount()) {
+                if (transaction.getFinal().getType() == ItemTypes.NONE || transaction.getFinal().getQuantity() < transaction.getOriginal().getQuantity()) {
                     if (Prism.listening.REMOVE) {
                         PrismRecord.PrismRecordEventBuilder record = PrismRecord.create().source(event.getCause());
                         record.removeItem(transaction).save();

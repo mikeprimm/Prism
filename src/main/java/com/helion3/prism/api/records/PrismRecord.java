@@ -25,12 +25,12 @@ package com.helion3.prism.api.records;
 
 import java.util.Date;
 import java.util.Optional;
+import java.util.List;
 
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Item;
@@ -45,12 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.helion3.prism.Prism;
 import com.helion3.prism.queues.RecordingQueue;
 import com.helion3.prism.util.DataQueries;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ContainerHorseInventory;
-import net.minecraft.inventory.Slot;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.entity.PlayerInventory;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.world.Locatable;
@@ -145,7 +140,7 @@ public class PrismRecord {
 
         protected final PrismRecordSourceBuilder source;
         protected String eventName;
-        protected DataContainer data = new MemoryDataContainer();
+        protected DataContainer data = DataContainer.createNew();
 
         private PrismRecordEventBuilder(PrismRecordSourceBuilder source) {
             this.source = source;
@@ -230,14 +225,14 @@ public class PrismRecord {
         }
 
         /**
-         * Describes a single item entity pickup.
+         * Describes a items picked up at a given Location.
          *
-         * @param entity Item Entity picked up.
+         * @param transaction itemstacks being inserted.
          * @return PrismRecord
          */
-        public PrismRecord pickedUp(Entity entity) {
+        public PrismRecord pickedUp(List<SlotTransaction> transactions) {
             this.eventName = "picked up";
-            writeItem((Item) entity);
+            writeItemTransactions(transactions);
             return new PrismRecord(source, this);
         }
 
@@ -378,22 +373,9 @@ public class PrismRecord {
         private void writeItemTransaction(SlotTransaction transaction) {
             checkNotNull(transaction);
 
-            // Location
             ((CarriedInventory) transaction.getSlot().parent()).getCarrier().ifPresent((Object carrier) -> {
-                if (carrier instanceof Locatable) {
-                    
-                    /**
-                       This is a bit of a hack, but will work until Sponge implements a better way of getting the real inventory of a slot.                     
-                     */
-                    Container container = ((Container) transaction.getSlot().parent());
-                    Integer slotClicked = transaction.getSlot().getProperty(SlotIndex.class, "slotindex").map(SlotIndex::getValue).orElse(-1);
-                    
-                    Slot slot = container.inventorySlots.get(slotClicked);
-                    
-                    if(slot.inventory instanceof PlayerInventory || slot.inventory instanceof ContainerHorseInventory) {
-                        return;
-                    }       
-                    
+                if (carrier instanceof Locatable && !(carrier instanceof Entity)) {
+
                     DataContainer location = ((Locatable) carrier).getLocation().toContainer();
                     data.set(DataQueries.Location, location);
 
@@ -401,27 +383,76 @@ public class PrismRecord {
                     int itemQty = 0;
 
                     // Insert
-                    if (transaction.getFinal().getType() != ItemTypes.NONE || transaction.getFinal().getCount() > transaction.getOriginal().getCount()) {
+                    if (transaction.getFinal().getType() != ItemTypes.NONE || transaction.getFinal().getQuantity() > transaction.getOriginal().getQuantity()) {
                         itemId = transaction.getFinal().getType().getId();
                         if (transaction.getOriginal().getType() == ItemTypes.NONE) {
-                            itemQty = transaction.getFinal().getCount();
+                            itemQty = transaction.getFinal().getQuantity();
                         } else {
-                            itemQty = transaction.getFinal().getCount() - transaction.getOriginal().getCount();
+                            itemQty = transaction.getFinal().getQuantity() - transaction.getOriginal().getQuantity();
                         }
                     }
                     // Remove
-                    if (transaction.getFinal().getType() == ItemTypes.NONE || transaction.getFinal().getCount() < transaction.getOriginal().getCount()) {
+                    if (transaction.getFinal().getType() == ItemTypes.NONE || transaction.getFinal().getQuantity() < transaction.getOriginal().getQuantity()) {
                         itemId = transaction.getOriginal().getType().getId();
                         if (transaction.getFinal().getType() == ItemTypes.NONE) {
-                            itemQty = transaction.getOriginal().getCount();
+                            itemQty = transaction.getOriginal().getQuantity();
                         } else {
-                            itemQty = transaction.getOriginal().getCount() - transaction.getFinal().getCount();
+                            itemQty = transaction.getOriginal().getQuantity() - transaction.getFinal().getQuantity();
                         }
                     }
 
                     data.set(DataQueries.Target, itemId);
                     data.set(DataQueries.Quantity, itemQty);
                 }
+            });
+        }
+
+        /**
+         * Helper method for writing block transaction data, using only the
+         * final replacement value. We must alter the data structure slightly to
+         * avoid duplication, decoupling location from blocks, etc.
+         *
+         * @param transactions BlockTransaction representing a block change in
+         * the world.
+         */
+        private void writeItemTransactions(List<SlotTransaction> transactions) {
+            checkNotNull(transactions);
+
+            transactions.forEach((transaction) -> {
+
+                // Location
+                ((CarriedInventory) transaction.getSlot().parent()).getCarrier().ifPresent((Object carrier) -> {
+                    if (carrier instanceof Locatable && !(carrier instanceof Entity)) {
+
+                        DataContainer location = ((Locatable) carrier).getLocation().toContainer();
+                        data.set(DataQueries.Location, location);
+
+                        String itemId = "";
+                        int itemQty = 0;
+
+                        // Insert
+                        if (transaction.getFinal().getType() != ItemTypes.NONE || transaction.getFinal().getQuantity() > transaction.getOriginal().getQuantity()) {
+                            itemId = transaction.getFinal().getType().getId();
+                            if (transaction.getOriginal().getType() == ItemTypes.NONE) {
+                                itemQty = transaction.getFinal().getQuantity();
+                            } else {
+                                itemQty = transaction.getFinal().getQuantity() - transaction.getOriginal().getQuantity();
+                            }
+                        }
+                        // Remove
+                        if (transaction.getFinal().getType() == ItemTypes.NONE || transaction.getFinal().getQuantity() < transaction.getOriginal().getQuantity()) {
+                            itemId = transaction.getOriginal().getType().getId();
+                            if (transaction.getFinal().getType() == ItemTypes.NONE) {
+                                itemQty = transaction.getOriginal().getQuantity();
+                            } else {
+                                itemQty = transaction.getOriginal().getQuantity() - transaction.getFinal().getQuantity();
+                            }
+                        }
+
+                        data.set(DataQueries.Target, itemId);
+                        data.set(DataQueries.Quantity, itemQty);
+                    }
+                });
             });
         }
 

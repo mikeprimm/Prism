@@ -28,8 +28,6 @@ import java.util.Optional;
 import com.google.common.base.Preconditions;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.MemoryDataView;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.block.BlockSnapshot.Builder;
 
@@ -41,6 +39,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import javax.annotation.Nonnull;
+import org.spongepowered.api.data.DataContainer;
 
 /**
  * Represents a block change event record.
@@ -101,8 +100,8 @@ public class BlockResult extends ResultComplete implements Actionable {
 
     public DataView formatBlockData(DataView finalBlock, @Nonnull Object optionalLocation) {
         Preconditions.checkNotNull(optionalLocation, "The location you are formatting cannot be null.");
-        DataView location = (MemoryDataView) optionalLocation;
-        DataView position = new MemoryDataContainer();
+        DataView location = (DataView)optionalLocation;
+        DataView position = DataContainer.createNew();
         position.set(DataQueries.X, location.get(DataQueries.X).get());
         position.set(DataQueries.Y, location.get(DataQueries.Y).get());
         position.set(DataQueries.Z, location.get(DataQueries.Z).get());

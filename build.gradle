@@ -1,16 +1,11 @@
 buildscript {
     repositories {
         maven {
-            name = 'forge'
-            url = 'http://files.minecraftforge.net/maven'
-        }
-        maven {
             url = 'https://plugins.gradle.org/m2/'
         }
     }
 
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
         classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.1'
     }
 }
@@ -27,17 +22,8 @@ plugins {
     id 'org.spongepowered.plugin' version '0.8.1'
 }
 
-apply plugin: 'net.minecraftforge.gradle.forge'
-
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-
-minecraft {
-    version = "1.12.1-14.22.1.2478"
-    runDir = "run"
-    mappings = "snapshot_20170911"
-    makeObfSourceJar = false
-}
 
 def getVersionName = { ->
     def stdout = new ByteArrayOutputStream()
@@ -79,7 +65,7 @@ repositories {
 
 // Project dependencies
 dependencies {
-    compile('org.spongepowered:spongecommon:7.0.0-SNAPSHOT:dev') {
+    compile('org.spongepowered:spongeapi:7.0.0-SNAPSHOT') {
         exclude module: 'testplugins'    
     }
     compile 'org.mongodb:mongo-java-driver:3.4.2'
