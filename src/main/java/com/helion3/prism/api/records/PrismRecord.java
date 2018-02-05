@@ -227,7 +227,7 @@ public class PrismRecord {
         /**
          * Describes a items picked up at a given Location.
          *
-         * @param transaction itemstacks being inserted.
+         * @param transactions itemstacks being inserted.
          * @return PrismRecord
          */
         public PrismRecord pickedUp(List<SlotTransaction> transactions) {

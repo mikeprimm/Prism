@@ -65,7 +65,7 @@ repositories {
 
 // Project dependencies
 dependencies {
-    compile('org.spongepowered:spongeapi:7.0.0-SNAPSHOT') {
+    compile('org.spongepowered:spongeapi:7.1.0-SNAPSHOT') {
         exclude module: 'testplugins'    
     }
     compile 'org.mongodb:mongo-java-driver:3.4.2'

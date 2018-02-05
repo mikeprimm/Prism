@@ -28,6 +28,7 @@ import com.helion3.prism.api.records.PrismRecord;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
@@ -42,7 +43,7 @@ public class ClickInventoryListener {
      * @param player
      */
     @Listener(order = Order.POST)
-     public void onInventoryClick(ClickInventoryEvent event, @Root Player player) {
+     public void onInventoryClick(ClickInventoryEvent event, @First Player player) {
         //Make sure we have a transaction to validate
         if (event.getTransactions().size() <= 0) {
             return;
